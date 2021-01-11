@@ -16,13 +16,20 @@ use Geocoder\Collection;
 use Geocoder\Exception\InvalidCredentials;
 use Geocoder\Exception\QuotaExceeded;
 use Geocoder\Exception\UnsupportedOperation;
+use Geocoder\Http\Provider\AbstractHttpProvider;
 use Geocoder\Model\Address;
 use Geocoder\Model\AddressCollection;
+use Geocoder\Provider\Provider;
 use Geocoder\Query\GeocodeQuery;
 use Geocoder\Query\ReverseQuery;
-use Geocoder\Http\Provider\AbstractHttpProvider;
-use Geocoder\Provider\Provider;
 use Http\Client\HttpClient;
+use function array_merge;
+use function count;
+use function filter_var;
+use function http_build_query;
+use function json_decode;
+use function rtrim;
+use function sprintf;
 
 class Pelias extends AbstractHttpProvider implements Provider
 {
@@ -179,7 +186,11 @@ class Pelias extends AbstractHttpProvider implements Provider
             $adminLevels = [];
             foreach (['region', 'county', 'locality', 'macroregion', 'country'] as $i => $component) {
                 if (isset($props[$component])) {
-                    $adminLevels[] = ['name' => $props[$component], 'level' => $i + 1];
+                    $adminLevels[] = [
+                        'name' => $props[$component],
+                        'level' => $i + 1,
+                        'code' => $props[sprintf('%s_a', $component)] ?? null,
+                    ];
                 }
             }
 
